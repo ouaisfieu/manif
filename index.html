@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Impact des Manifestations en Belgique : Sociologie & Politique</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdfbf7',
+                            100: '#f7f2e8',
+                            200: '#efe3cf',
+                            500: '#c29b38',
+                            700: '#8c6b1f',
+                            800: '#5c4412',
+                            900: '#382708',
+                        },
+                        belgian: {
+                            red: '#e30613',
+                            yellow: '#ffe900',
+                            black: '#000000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Chart Container constraints as per technical requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid #c29b38;
+            color: #382708;
+            font-weight: 700;
+            background-color: #f7f2e8;
+        }
+    </style>
+</head>
+<body class="bg-amber-50/40 text-stone-800 antialiased font-sans min-h-screen flex flex-col">
+
+<!-- Chosen Palette: Warm Sand & Slate (Stone-50, Amber-50/40 background, Warm Gold #c29b38 accent, Deep Stone-900 text, Emerald/Rose/Indigo semantic highlights) -->
+<!-- Application Structure Plan: Interactive 6-tab dashboard structure designed for non-linear exploration: 1. Fresque Historique (Chronological interactive drill-down), 2. Combats Contemporains (Card comparison & success filters), 3. Modèle Institutionnel (Interactive Pillar & Parity Diagram), 4. Analyses Scientifiques (Chart.js breakdown of Media & WUNC models), 5. Matrice dWUNC & Simulateur (Interactive slider tool evaluating protest impact), 6. Synthèse & Perspectives (Verrous vs Levier de la rue). This user flow prioritizes analytical comprehension and active engagement with academic findings. -->
+<!-- Visualization & Content Choices: 1. Chart.js Donut/Bar for Media Attention Types (Sustainers/Surfers/Stagnants) - Goal: Categorize protest impact on media. 2. Interactive dWUNC Scorecard Simulator (Vanilla JS) - Goal: Test hypotheses on protest success factors. 3. Interactive Filtering Table for Historical Events - Goal: Compare triggers, tactics, and legal outcomes. 4. Styled HTML Grid for Insiders vs Outsiders - Goal: Structural contrast without SVG/Mermaid. Confirming NO SVG/Mermaid used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header Navigation -->
+    <header class="bg-stone-900 text-stone-100 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center py-4 border-b border-stone-800">
+                <div class="flex items-center space-x-3 mb-3 md:mb-0">
+                    <span class="inline-block w-3 h-8 bg-brand-500 rounded-sm"></span>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-amber-100">Sociologie de la Protestation en Belgique</h1>
+                        <p class="text-xs text-stone-400">Genèse institutionnelle, mécanique d'efficacité & contraintes structurelles</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 text-xs text-stone-300 bg-stone-800 px-3 py-1.5 rounded-full border border-stone-700">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Modèle Consociatif & Concertation Sociale</span>
+                </div>
+            </div>
+            <!-- Main Navigation Tabs -->
+            <nav class="flex overflow-x-auto space-x-1 py-2 no-scrollbar text-xs md:text-sm font-medium border-t border-stone-800" id="main-nav">
+                <button onclick="switchTab('tab-1')" id="btn-tab-1" class="tab-btn active px-4 py-2.5 rounded-t-md transition whitespace-nowrap text-stone-300 hover:text-amber-200">1. Fresque Historique</button>
+                <button onclick="switchTab('tab-2')" id="btn-tab-2" class="tab-btn px-4 py-2.5 rounded-t-md transition whitespace-nowrap text-stone-300 hover:text-amber-200">2. Mobilisations 2014-2026</button>
+                <button onclick="switchTab('tab-3')" id="btn-tab-3" class="tab-btn px-4 py-2.5 rounded-t-md transition whitespace-nowrap text-stone-300 hover:text-amber-200">3. Modèle Institutionnel</button>
+                <button onclick="switchTab('tab-4')" id="btn-tab-4" class="tab-btn px-4 py-2.5 rounded-t-md transition whitespace-nowrap text-stone-300 hover:text-amber-200">4. Analyses Scientifiques</button>
+                <button onclick="switchTab('tab-5')" id="btn-tab-5" class="tab-btn px-4 py-2.5 rounded-t-md transition whitespace-nowrap text-stone-300 hover:text-amber-200">5. Simulateur dWUNC</button>
+                <button onclick="switchTab('tab-6')" id="btn-tab-6" class="tab-btn px-4 py-2.5 rounded-t-md transition whitespace-nowrap text-stone-300 hover:text-amber-200">6. Bilan & Perspectives</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- SECTION 1: FRESQUE HISTORIQUE -->
+        <section id="tab-1" class="tab-content block space-y-8">
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">1. Grandes Mobilisations Historiques et Transformations de l'État</h2>
+                <p class="text-stone-600 leading-relaxed text-sm md:text-base">
+                    Cette section retrace les séquences fondatrices où les grèves générales et la protestation de rue ont directement façonné l'architecture institutionnelle belge. De la conquête du suffrage universel à la refonte policière post-Marche blanche, la rue a historiquement servi de véritable matrice législative et constitutionnelle. Explorez ci-dessous le tableau interactif et filtrez les événements pour analyser leurs déclencheurs, leurs acteurs et leurs retombées directes.
+                </p>
+            </div>
+
+            <!-- Historical Interactive Explorer -->
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-stone-100">
+                    <div>
+                        <h3 class="text-lg font-bold text-stone-800">Explorateur des Séquences Fondatrices (1886 – 1996)</h3>
+                        <p class="text-xs text-stone-500">Cliquez sur une ligne pour afficher l'analyse socio-politique détaillée</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <button onclick="filterHistory('all')" class="px-3 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 font-medium text-stone-700">Toutes</button>
+                        <button onclick="filterHistory('suffrage')" class="px-3 py-1.5 rounded-full bg-amber-100 hover:bg-amber-200 font-medium text-brand-800">Suffrage & Démocratie</button>
+                        <button onclick="filterHistory('consociatif')" class="px-3 py-1.5 rounded-full bg-indigo-100 hover:bg-indigo-200 font-medium text-indigo-800">Crises Consociatives</button>
+                        <button onclick="filterHistory('fédéralisme')" class="px-3 py-1.5 rounded-full bg-emerald-100 hover:bg-emerald-200 font-medium text-emerald-800">Réformes de l'État</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-stone-50 border-b border-stone-200 text-xs font-semibold text-stone-500 uppercase">
+                                <th class="py-3 px-4">Période / Événement</th>
+                                <th class="py-3 px-4">Déclencheur Majeur</th>
+                                <th class="py-3 px-4">Acteurs & Répertoire</th>
+                                <th class="py-3 px-4">Résultat Institutionnel Direct</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-stone-100">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Dynamic Detail Modal / Card -->
+                <div id="history-detail" class="hidden bg-stone-50 p-6 rounded-lg border border-brand-200 transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 id="hist-title" class="text-xl font-bold text-brand-800"></h4>
+                        <span id="hist-tag" class="px-2.5 py-1 text-xs font-semibold rounded-full bg-brand-100 text-brand-800"></span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs md:text-sm">
+                        <div class="bg-white p-4 rounded-md border border-stone-200">
+                            <span class="font-bold text-stone-700 block mb-1">Contexte & Déclencheur</span>
+                            <p id="hist-context" class="text-stone-600"></p>
+                        </div>
+                        <div class="bg-white p-4 rounded-md border border-stone-200">
+                            <span class="font-bold text-stone-700 block mb-1">Mode d'Action & Déroulement</span>
+                            <p id="hist-action" class="text-stone-600"></p>
+                        </div>
+                        <div class="bg-white p-4 rounded-md border border-stone-200">
+                            <span class="font-bold text-stone-700 block mb-1">Impacts Court & Long Terme</span>
+                            <p id="hist-impact" class="text-stone-600"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: MOBILISATIONS CONTEMPORAINES -->
+        <section id="tab-2" class="tab-content hidden space-y-8">
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">2. Mouvements Sociaux Contemporains (2014 – 2026)</h2>
+                <p class="text-stone-600 leading-relaxed text-sm md:text-base">
+                    L'analyse des grands cycles récents de protestation montre une divergence marquée des résultats selon la nature des revendications, le calendrier électoral et la marge de manœuvre du gouvernement. Alors que les mobilisations syndicales interprofessionnelles se heurtent à la rigidité des accords de coalition, le secteur de la santé (« Blouses blanches ») et le monde agricole ont arraché des concessions budgétaires et réglementaires majeures.
+                </p>
+            </div>
+
+            <!-- Interactive Grid of Contemporary Movements -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1: Syndicats Michel & Vivaldi & Arizona -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2.5 py-1 rounded text-xs font-bold bg-amber-100 text-amber-800">Syndical / Interprofessionnel</span>
+                            <span class="text-xs text-stone-400">2014 – 2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-stone-900 mb-2">Pensions, Salaires & Loi de 1996</h3>
+                        <p class="text-xs text-stone-600 leading-relaxed mb-4">
+                            Actions du Front commun syndical (FGTB, CSC, CGSLB) contre les réformes Michel Ier (pension à 67 ans, saut d'index), Vivaldi (loi de 1996) et la coalition Arizona (austérité, chômage).
+                        </p>
+                        <div class="bg-stone-50 p-3 rounded-md text-xs space-y-2 border border-stone-200">
+                            <div><strong class="text-stone-800">Concessions Obtenues :</strong> Abandon de la pension à points (2018), préservation intégrale de l'indexation automatique des salaires (2022) et prime pouvoir d'achat (750€).</div>
+                            <div><strong class="text-stone-800">Limites :</strong> Maintien du relèvement de l'âge légal de la retraite et verrouillage de la loi de 1996 par le patronat.</div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-stone-100 flex justify-between items-center text-xs">
+                        <span class="font-semibold text-stone-500">Niveau d'Efficacité :</span>
+                        <span class="px-2 py-1 rounded font-bold bg-amber-100 text-amber-800">Freinage / Compensa.</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Climat & Klimaatzaak -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2.5 py-1 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Environnement / Citoyen</span>
+                            <span class="text-xs text-stone-400">2018 – 2023</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-stone-900 mb-2">Marches Climat & Klimaatzaak</h3>
+                        <p class="text-xs text-stone-600 leading-relaxed mb-4">
+                            Grèves scolaires de <em>Youth for Climate</em> (20 semaines) et marches citoyennes de 75 000 personnes exigeant une loi spéciale climat.
+                        </p>
+                        <div class="bg-stone-50 p-3 rounded-md text-xs space-y-2 border border-stone-200">
+                            <div><strong class="text-stone-800">Concessions Obtenues :</strong> Poussée électorale écologiste (2019) et victoire judiciaire historique en appel (*Klimaatzaak*, nov. 2023) condamnant l'État à -55 % d'émissions d'ici 2030.</div>
+                            <div><strong class="text-stone-800">Limites :</strong> Blocage parlementaire de la révision de l'art. 7bis de la Constitution par la N-VA, CD&V et Open Vld.</div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-stone-100 flex justify-between items-center text-xs">
+                        <span class="font-semibold text-stone-500">Niveau d'Efficacité :</span>
+                        <span class="px-2 py-1 rounded font-bold bg-indigo-100 text-indigo-800">Judiciarisation</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Soins de Santé -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2.5 py-1 rounded text-xs font-bold bg-rose-100 text-rose-800">Secteur Non-Marchand</span>
+                            <span class="text-xs text-stone-400">2019 – 2025</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-stone-900 mb-2">Mouvement des "Blouses Blanches"</h3>
+                        <p class="text-xs text-stone-600 leading-relaxed mb-4">
+                            Mobilisation du personnel soignant contre la pénurie et la dégradation des conditions de travail, survenue durant la période de gouvernement en affaires courantes.
+                        </p>
+                        <div class="bg-stone-50 p-3 rounded-md text-xs space-y-2 border border-stone-200">
+                            <div><strong class="text-stone-800">Concessions Obtenues :</strong> Vote de la loi du 9 décembre 2019 créant le <em>Fonds Blouses Blanches</em> (400M€+), accord social de 600M€+ et classification barémique IF-IC.</div>
+                            <div><strong class="text-stone-800">Facteur Clé :</strong> Exploitation d'un gouvernement minoritaire sans accord de coalition contraignant.</div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-stone-100 flex justify-between items-center text-xs">
+                        <span class="font-semibold text-stone-500">Niveau d'Efficacité :</span>
+                        <span class="px-2 py-1 rounded font-bold bg-emerald-100 text-emerald-800">Victoire Totale</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: Colère Agricole -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2.5 py-1 rounded text-xs font-bold bg-lime-100 text-lime-800">Agricole / Logistique</span>
+                            <span class="text-xs text-stone-400">2024 – 2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-stone-900 mb-2">Protestations des Agriculteurs</h3>
+                        <p class="text-xs text-stone-600 leading-relaxed mb-4">
+                            Blocages d'autoroutes, du port de Zeebrugge et de Bruxelles par la FWA, le Boerenbond et la FUGEA à la veille du scrutin de juin 2024.
+                        </p>
+                        <div class="bg-stone-50 p-3 rounded-md text-xs space-y-2 border border-stone-200">
+                            <div><strong class="text-stone-800">Concessions Obtenues :</strong> Marge d'assouplissement des normes PAC (suppression des jachères BCAE 8), simplification administrative wallonne et ajustement du décret azote flamand.</div>
+                            <div><strong class="text-stone-800">Facteur Clé :</strong> Pression logistique maximale et proximité immédiate du calendrier électoral.</div>
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-stone-100 flex justify-between items-center text-xs">
+                        <span class="font-semibold text-stone-500">Niveau d'Efficacité :</span>
+                        <span class="px-2 py-1 rounded font-bold bg-emerald-100 text-emerald-800">Succès Rapide</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MODÈLE INSTITUTIONNEL -->
+        <section id="tab-3" class="tab-content hidden space-y-8">
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">3. Le Modèle Institutionnel Belge : Pilarisation & Concertation Sociale</h2>
+                <p class="text-stone-600 leading-relaxed text-sm md:text-base">
+                    Pour comprendre pourquoi les manifestations belges se déroulent selon des rites hautement codifiés, il faut observer l'architecture néo-corporatiste du pays. Historiquement structurée en "piliers" (chrétien, socialiste, libéral), la société belge confie la régulation des conflits à une concertation sociale paritaire multi-niveaux. Explorez ci-dessous les deux faces de ce système : le canal d'intégration institutionnelle et la crise contemporaine de la concertation.
+                </p>
+            </div>
+
+            <!-- Pillars & Concertation Visual Architecture -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Pillar Structure Card -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-stone-900 border-b pb-2 border-stone-100">Les 3 Piliers Historiques</h3>
+                    <p class="text-xs text-stone-500">Intégration "du berceau à la tombe" associant parti, syndicat et mutualité.</p>
+                    
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded-r">
+                            <span class="font-bold text-red-900 block">Pilier Socialiste</span>
+                            <span class="text-red-700">FGTB / ABVV • PS / Vooruit • Solidaris</span>
+                        </div>
+                        <div class="p-3 bg-emerald-50 border-l-4 border-emerald-500 rounded-r">
+                            <span class="font-bold text-emerald-900 block">Pilier Chrétien</span>
+                            <span class="text-emerald-700">CSC / ACV • Les Engagés / CD&V • MC / CM</span>
+                        </div>
+                        <div class="p-3 bg-blue-50 border-l-4 border-blue-500 rounded-r">
+                            <span class="font-bold text-blue-900 block">Pilier Libéral</span>
+                            <span class="text-blue-900">CGSLB / ACLVB • MR / Open Vld • LM</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Multi-level Negotiation Pyramide -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-stone-900 border-b pb-2 border-stone-100">Pyramide de la Concertation</h3>
+                    <p class="text-xs text-stone-500">Instance paritaire où se transforment les rapports de force de la rue.</p>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2.5 bg-stone-900 text-stone-100 text-center rounded font-semibold">
+                            Groupe des Dix / CNT / CCE
+                            <span class="block text-[10px] text-stone-400 font-normal">Accords Interprofessionnels (AIP)</span>
+                        </div>
+                        <div class="p-2.5 bg-stone-700 text-stone-100 text-center rounded font-semibold">
+                            Commissions Paritaires Sectorielles
+                            <span class="block text-[10px] text-stone-300 font-normal">CCT, Barèmes & Conditions de travail</span>
+                        </div>
+                        <div class="p-2.5 bg-stone-100 text-stone-800 text-center rounded border border-stone-300 font-semibold">
+                            Conseils d'Entreprise (CE) & CPPT
+                            <span class="block text-[10px] text-stone-500 font-normal">Délégations Syndicales de terrain</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dépilarisation & Bypass -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-stone-900 border-b pb-2 border-stone-100">Dépilarisation & Contournement</h3>
+                    <p class="text-xs text-stone-500">Mise à l'écart de la concertation sociale ("Réformer la Belgique sans le dire").</p>
+
+                    <div class="space-y-3 text-xs text-stone-600">
+                        <div class="p-3 bg-amber-50 rounded border border-amber-200">
+                            <strong class="text-brand-800 block mb-1">Ascendant du Gouvernement Fédéral</strong>
+                            L'exécutif fixe unilatéralement le cadre budgétaire dans l'accord de coalition, réduisant la négociation paritaire à une chambre d'exécution technique.
+                        </div>
+                        <div class="p-3 bg-stone-50 rounded border border-stone-200">
+                            <strong class="text-stone-800 block mb-1">Système de Gand & Syndicalisation</strong>
+                            Malgré la dépilarisation politique, le taux de syndicalisation reste >50% car les syndicats gèrent le paiement des allocations de chômage.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: ANALYSES SCIENTIFIQUES -->
+        <section id="tab-4" class="tab-content hidden space-y-8">
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">4. Études de Science Politique et Sociologie de l'Efficacité</h2>
+                <p class="text-stone-600 leading-relaxed text-sm md:text-base">
+                    Comment la rue influence-t-elle l'agenda politique ? Les travaux pionniers du groupe de recherche <em>Media, Movements and Politics</em> ($M^2P$ - universités d'Anvers et d'Amsterdam) analysent les mécanismes de médiation médiatique, les typologies de cycles d'attention et les asymétries entre syndicats <em>insiders</em> et mouvements citoyens <em>outsiders</em>.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Chart Container: Typology of Media Attention -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold text-stone-900">Typologie de l'Impact Médiatique des Manifestations</h3>
+                    <p class="text-xs text-stone-500">Répartition empirique des manifestations selon leur capacité à capter l'attention médiatique (Source: Wouters et al., 2023).</p>
+                    
+                    <div class="chart-container">
+                        <canvas id="chartMediaImpact"></canvas>
+                    </div>
+                    
+                    <div class="text-xs text-stone-600 space-y-1 bg-stone-50 p-3 rounded border border-stone-200">
+                        <div><strong class="text-stone-800">Sustainers (7%) :</strong> Déclenchent ex-nihilo et maintiennent durablement l'attention.</div>
+                        <div><strong class="text-stone-800">Surfers (29%) :</strong> Profitent d'une vague médiatique préexistante pour prolonger le sujet.</div>
+                        <div><strong class="text-stone-800">Stagnants (64%) :</strong> N'engendrent aucune hausse d'attention la semaine suivante ($t+1$).</div>
+                    </div>
+                </div>
+
+                <!-- Theory 2: Double Mediation & Agenda Setting -->
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-6">
+                    <h3 class="text-lg font-bold text-stone-900">Modèle du "Double Médiateur" Médiatique</h3>
+                    <p class="text-xs text-stone-500">Walgarve & Vliegenthart (2012) : La manifestation produit un impact politique à travers une chaîne à deux étages.</p>
+
+                    <div class="space-y-4 text-xs">
+                        <div class="flex items-center space-x-3">
+                            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center">1</span>
+                            <div class="p-3 bg-stone-50 rounded border border-stone-200 flex-grow">
+                                <strong class="text-stone-800 block">Protest Coverage</strong>
+                                La manifestation génère une couverture journalistique brute de l'événement.
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-brand-700 text-white font-bold flex items-center justify-center">2</span>
+                            <div class="p-3 bg-stone-50 rounded border border-stone-200 flex-grow">
+                                <strong class="text-stone-800 block">General Issue Attention</strong>
+                                Les médias élargissent leur attention générale à la problématique de fond.
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center">3</span>
+                            <div class="p-3 bg-stone-50 rounded border border-stone-200 flex-grow">
+                                <strong class="text-stone-800 block">Agenda Parlementaire & Gouvernemental</strong>
+                                Les députés interpellent l'exécutif, forçant l'inscription du sujet à l'agenda.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Table: Insiders vs Outsiders -->
+                    <div class="pt-4 border-t border-stone-200">
+                        <h4 class="font-bold text-stone-800 text-xs uppercase mb-3">Syndicats Insiders vs Mouvements Outsiders</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-stone-100 font-semibold text-stone-600">
+                                        <th class="p-2 border">Dimension</th>
+                                        <th class="p-2 border">Syndicats (Insiders)</th>
+                                        <th class="p-2 border">Citoyens / NMS (Outsiders)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="p-2 border font-bold">Signal de Rue</td>
+                                        <td class="p-2 border">Prévisible & Ritualisé</td>
+                                        <td class="p-2 border text-emerald-700 font-semibold">Disruptif & Neuf</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 border font-bold">Mise à l'Agenda</td>
+                                        <td class="p-2 border">Faible à Modéré</td>
+                                        <td class="p-2 border text-emerald-700 font-semibold">Élevée sur médias/députés</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2 border font-bold">Suivi Législatif</td>
+                                        <td class="p-2 border text-emerald-700 font-semibold">Très Élevé (Commissions)</td>
+                                        <td class="p-2 border">Faible (Risque essoufflement)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: SIMULATEUR dWUNC -->
+        <section id="tab-5" class="tab-content hidden space-y-8">
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">5. Matrice des Facteurs de Succès & Simulateur dWUNC</h2>
+                <p class="text-stone-600 leading-relaxed text-sm md:text-base">
+                    Basé sur les travaux de Wouters & Walgrave (<em>American Sociological Review</em>, 2017), le modèle <strong>dWUNC</strong> évalue la capacité de persuasion d'une manifestation auprès des élus belges selon 5 critères : <em>Diversity, Worthiness, Unity, Numbers, Commitment</em>, combinés au soutien de l'opinion publique et au calendrier électoral.
+                    Faites varier les curseurs ci-dessous pour simuler l'impact politique prédit d'un mouvement protestataire.
+                </p>
+            </div>
+
+            <!-- Interactive Simulator Dashboard -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Sliders Panel -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl border border-stone-200 shadow-sm space-y-6">
+                    <h3 class="text-lg font-bold text-stone-900 border-b pb-2">Ajuster les Variables de la Mobilisation</h3>
+
+                    <div class="space-y-4">
+                        <!-- Numbers -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <label for="input-numbers">Nombre de Participants (Numbers)</label>
+                                <span id="val-numbers" class="text-brand-700">50 000 personnes</span>
+                            </div>
+                            <input type="range" id="input-numbers" min="1000" max="200000" step="1000" value="50000" oninput="updateSimulator()" class="w-full accent-amber-600">
+                        </div>
+
+                        <!-- Unity -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <label for="input-unity">Unité du Front Protestataire (Unity)</label>
+                                <span id="val-unity" class="text-brand-700">Moyenne (Front syndical dividé)</span>
+                            </div>
+                            <input type="range" id="input-unity" min="1" max="5" step="1" value="3" oninput="updateSimulator()" class="w-full accent-amber-600">
+                        </div>
+
+                        <!-- Diversity -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <label for="input-diversity">Diversité Sociodémographique (Diversity)</label>
+                                <span id="val-diversity" class="text-brand-700">Élevée (Intersectorielle)</span>
+                            </div>
+                            <input type="range" id="input-diversity" min="1" max="5" step="1" value="4" oninput="updateSimulator()" class="w-full accent-amber-600">
+                        </div>
+
+                        <!-- Worthiness vs Violence -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <label for="input-worthiness">Caractère Pacifique / Dignité (Worthiness)</label>
+                                <span id="val-worthiness" class="text-brand-700">Pacifique (Pas de débordement)</span>
+                            </div>
+                            <input type="range" id="input-worthiness" min="1" max="5" step="1" value="4" oninput="updateSimulator()" class="w-full accent-amber-600">
+                        </div>
+
+                        <!-- Timing / Elections -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <label for="input-timing">Proximité des Élections ou Affaires Courantes</label>
+                                <span id="val-timing" class="text-brand-700">Mi-législature</span>
+                            </div>
+                            <input type="range" id="input-timing" min="1" max="5" step="1" value="3" oninput="updateSimulator()" class="w-full accent-amber-600">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Results Output -->
+                <div class="bg-stone-900 text-stone-100 p-6 rounded-xl shadow-md flex flex-col justify-between space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-amber-100 border-b border-stone-800 pb-2">Prédiction d'Efficacité</h3>
+                        
+                        <div class="mt-6 text-center">
+                            <div id="sim-score" class="text-5xl font-extrabold text-amber-400 mb-1">68 / 100</div>
+                            <span id="sim-verdict" class="text-xs uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-amber-900/60 text-amber-200">Réponse Partielle attendue</span>
+                        </div>
+
+                        <div class="mt-6 space-y-3 text-xs text-stone-300">
+                            <div class="flex justify-between">
+                                <span>Impact Agenda Parlementaire :</span>
+                                <strong id="sim-parl" class="text-emerald-400">Élevé</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Attention Gouvernementale :</span>
+                                <strong id="sim-gov" class="text-amber-400">Modérée</strong>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Chances de Vote Législatif :</span>
+                                <strong id="sim-leg" class="text-rose-400">Faibles</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-stone-800 rounded border border-stone-700 text-[11px] text-stone-400 leading-relaxed" id="sim-advice">
+                        Les élus belges réagissent prioritairement au nombre et à l'unité. Un basculement dans la violence ferait immédiatement chuter l'adhésion des députés de la majorité.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: BILAN & PERSPECTIVES -->
+        <section id="tab-6" class="tab-content hidden space-y-8">
+            <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-stone-900 mb-2">6. Synthèse Critique : Quelle est l'Utilité Réelle de Manifester ?</h2>
+                <p class="text-stone-600 leading-relaxed text-sm md:text-base">
+                    Au terme de cette analyse, l'utilité de la manifestation en Belgique ne peut se réduire à son impact législatif immédiat. Si les verrous de la particratie et les contraintes budgétaires européennes étouffent parfois les revendications directes, la rue conserve des fonctions stratégiques indispensables à la santé démocratique du pays.
+                </p>
+            </div>
+
+            <!-- Two Columns Balance Sheet -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Lockouts / Obstacles -->
+                <div class="bg-rose-50/50 p-6 rounded-xl border border-rose-200 space-y-4">
+                    <div class="flex items-center space-x-2 text-rose-900 font-bold text-lg border-b border-rose-200 pb-2">
+                        <span>Étau & Obstacles Structurels</span>
+                    </div>
+                    <ul class="space-y-3 text-xs md:text-sm text-stone-700">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-rose-600 font-bold">✓</span>
+                            <span><strong>Rigidité des Accords de Coalition :</strong> L'accord gouvernemental multipartisan fonctionne comme un contrat quasi-intouchable. Céder sous la rue risque de rompre l'équilibre de la majorité.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-rose-600 font-bold">✓</span>
+                            <span><strong>Contraintes Budgétaires Européennes :</strong> La procédure pour déficit excessif (objectif &lt; 3% du PIB) limite la capacité de l'État à acheter la paix sociale par de nouvelles dépenses.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-rose-600 font-bold">✓</span>
+                            <span><strong>Loi de 1996 sur la Compétitivité :</strong> Cadre normatif strict encadrant les hausses salariales réelles à 0%, soustrayant la négociation à la pression directe des cortèges.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Strategic Functions -->
+                <div class="bg-emerald-50/50 p-6 rounded-xl border border-emerald-200 space-y-4">
+                    <div class="flex items-center space-x-2 text-emerald-900 font-bold text-lg border-b border-emerald-200 pb-2">
+                        <span>Fonctions Stratégiques Permanentes</span>
+                    </div>
+                    <ul class="space-y-3 text-xs md:text-sm text-stone-700">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span><strong>Pouvoir de Freinage & Maintien des Acquis :</strong> Bloquer la pension à points, préserver l'indexation automatique des salaires et obtenir des primes compensatoires.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span><strong>Politisation de l'Agenda :</strong> Rompre le consensus des élites, forcer le débat public médiatisé et préparer les alternances électorales futures.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span><strong>Alliance Hybride Insiders / Outsiders :</strong> Synergie entre syndicats traditionnels (force logistique) et mouvements citoyens/ONG (saillance médiatique).</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-emerald-600 font-bold">✓</span>
+                            <span><strong>Levier Judiciaire & Opportunité :</strong> Prolongement de la rue devant les prétoires (<em>Klimaatzaak</em>) ou exploitation des gouvernements minoritaires (<em>Blouses blanches</em>).</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 text-xs py-6 border-t border-stone-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <p class="font-semibold text-stone-300">Sociologie Politique de l'Action Protestataire en Belgique</p>
+                <p class="text-[11px] text-stone-500">Basé sur les travaux du CRISP, $M^2P$ (UAntwerpen), ULB et VUB.</p>
+            </div>
+            <div class="text-stone-500 text-[11px]">
+                <span>Single-Page Application Interactive • Version 2026</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data for Section 1: Historical Timeline Explorer
+        const historyData = [
+            {
+                id: '1886-1919',
+                title: 'Grèves Générales pour le Suffrage Universel',
+                category: 'suffrage',
+                period: '1886 – 1919',
+                trigger: 'Exclusion électorale de la classe ouvrière par le système censitaire ; opuscule "Catéchisme du peuple" (1886).',
+                action: 'Grèves générales politiques du POB (1893, 1902, 1913) mobilisant jusqu\'à 400 000 travailleurs sans débordements.',
+                impact: 'Adoption du suffrage universel masculin tempéré par le vote plural (1893), représentation proportionnelle (1899) et suffrage universel pur et simple (1919).'
+            },
+            {
+                id: '1950',
+                title: 'La Question Royale',
+                category: 'consociatif',
+                period: 'Mars – Août 1950',
+                trigger: 'Consultation populaire sur le retour de Léopold III (72,2% oui en Flandre vs 42% en Wallonie).',
+                action: 'Grève générale insurrectionnelle en Wallonie/Bruxelles, sabotages, gouvernement wallon séparatiste, drame de Grâce-Berleur (30 juillet).',
+                impact: 'Délégation des prérogatives au prince Baudouin dès le 1er août 1950 et abdication en 1951. Établit l\'impossibilité d\'un coup de force majoritaire unicommunautaire.'
+            },
+            {
+                id: '1950-1958',
+                title: 'La Deuxième Guerre Scolaire',
+                category: 'consociatif',
+                period: '1950 – 1958',
+                trigger: 'Lois Harmel (PSC) puis Loi Collard (1955, coalition socialiste-libérale) réduisant les subsides à l\'enseignement catholique.',
+                action: 'Mobilisation du pilier catholique, marche de 100 000+ manifestants à Bruxelles (mars 1955), grèves scolaires et boycott financier.',
+                impact: 'Signature du Pacte Scolaire (20 nov. 1958) et loi de 1959 : pacification consociative, libre choix des parents et subventionnement pérenne.'
+            },
+            {
+                id: '1960-1961',
+                title: 'La "Grève du Siècle" de l\'Hiver 1960-1961',
+                category: 'fédéralisme',
+                period: 'Déc. 1960 – Janv. 1961',
+                trigger: 'Projet d\'austérité "Loi Unique" du gouvernement Gaston Eyskens III.',
+                action: 'Grève générale de 5 semaines menée par la FGTB wallonne (André Renard), paralysie industrielle, affrontements.',
+                impact: 'Dissolution du Parlement (février 1961), naissance du Mouvement Populaire Wallon (MPW) et conversion du syndicalisme au fédéralisme (réformes de l\'État 1970-2011).'
+            },
+            {
+                id: '1996',
+                title: 'La Marche Blanche',
+                category: 'fédéralisme',
+                period: '20 Octobre 1996',
+                trigger: 'Affaire Dutroux, dysfonctionnements de la "guerre des polices" et dessaisissement du juge Connerotte.',
+                action: 'Rassemblement citoyen silencieux spontané de 300 000+ personnes à Bruxelles vêtues de blanc.',
+                impact: 'Accord Octopus (1998), loi du 7 déc. 1998 créant la police intégrée à deux niveaux (fédérale/locale), loi Franchimont et création du Conseil Supérieur de la Justice.'
+            }
+        ];
+
+        // Initialize Table
+        function renderHistoryTable(filter = 'all') {
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = filter === 'all' ? historyData : historyData.filter(item => item.category === filter);
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-amber-50/50 cursor-pointer transition';
+                tr.onclick = () => showHistoryDetail(item);
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-stone-900">${item.title} <span class="block text-xs font-normal text-stone-500">${item.period}</span></td>
+                    <td class="py-3 px-4 text-xs text-stone-600">${item.trigger.substring(0, 75)}...</td>
+                    <td class="py-3 px-4 text-xs text-stone-600">${item.action.substring(0, 70)}...</td>
+                    <td class="py-3 px-4 text-xs font-semibold text-brand-800">${item.impact.substring(0, 80)}...</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterHistory(cat) {
+            renderHistoryTable(cat);
+        }
+
+        function showHistoryDetail(item) {
+            const detailBox = document.getElementById('history-detail');
+            document.getElementById('hist-title').innerText = item.title + " (" + item.period + ")";
+            document.getElementById('hist-tag').innerText = item.category.toUpperCase();
+            document.getElementById('hist-context').innerText = item.trigger;
+            document.getElementById('hist-action').innerText = item.action;
+            document.getElementById('hist-impact').innerText = item.impact;
+
+            detailBox.classList.remove('hidden');
+            detailBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('active');
+
+            // Render chart if tab 4 active
+            if (tabId === 'tab-4' && !window.mediaChartRendered) {
+                renderMediaChart();
+                window.mediaChartRendered = true;
+            }
+        }
+
+        // Chart.js: Media Attention Typology
+        function renderMediaChart() {
+            const ctx = document.getElementById('chartMediaImpact').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stagnants (Aucun impact t+1)', 'Surfers (Surfent sur vague)', 'Sustainers (Spark & Sustain)'],
+                    datasets: [{
+                        data: [64, 29, 7],
+                        backgroundColor: ['#d6d3d1', '#c29b38', '#059669'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 11 },
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '% des manifestations';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Simulator Logic
+        function updateSimulator() {
+            const num = parseInt(document.getElementById('input-numbers').value);
+            const unity = parseInt(document.getElementById('input-unity').value);
+            const div = parseInt(document.getElementById('input-diversity').value);
+            const worth = parseInt(document.getElementById('input-worthiness').value);
+            const timing = parseInt(document.getElementById('input-timing').value);
+
+            // Update Labels
+            document.getElementById('val-numbers').innerText = num.toLocaleString('fr-BE') + " manifestants";
+            
+            const unityText = ['Divisé / Concurrentiel', 'Faible', 'Moyen (Front partiel)', 'Élevé (Front Commun)', 'Unanimité Totale'];
+            document.getElementById('val-unity').innerText = unityText[unity - 1];
+
+            const divText = ['Unipersonnel / Corporatiste', 'Faible', 'Moyenne', 'Élevée (Intersectorielle)', 'Transversale Nationale'];
+            document.getElementById('val-diversity').innerText = divText[div - 1];
+
+            const worthText = ['Violent / Émeutes', 'Tensions Fortes', 'Perturbateur Pacifique', 'Pacifique Dignifié', 'Marche Silencieuse Exemplaire'];
+            document.getElementById('val-worthiness').innerText = worthText[worth - 1];
+
+            const timingText = ['Début de mandature (Loin élec.)', 'Mi-mandat', 'Année Électorale', 'Aube du scrutin (&lt;3 mois)', 'Affaires Courantes / Gouvernement Minoritaire'];
+            document.getElementById('val-timing').innerText = timingText[timing - 1];
+
+            // Calculation Score Formula
+            let score = 0;
+            // Numbers weight
+            score += Math.min(30, (num / 200000) * 30);
+            // Unity
+            score += (unity / 5) * 20;
+            // Diversity
+            score += (div / 5) * 15;
+            // Worthiness
+            score += (worth / 5) * 15;
+            // Timing
+            score += (timing / 5) * 20;
+
+            score = Math.round(score);
+
+            // Display Score
+            document.getElementById('sim-score').innerText = score + " / 100";
+
+            // Determine Output text
+            const scoreEl = document.getElementById('sim-score');
+            const verdictEl = document.getElementById('sim-verdict');
+            const parlEl = document.getElementById('sim-parl');
+            const govEl = document.getElementById('sim-gov');
+            const legEl = document.getElementById('sim-leg');
+            const adviceEl = document.getElementById('sim-advice');
+
+            if (score >= 75) {
+                verdictEl.innerText = "Forte Probabilité de Concessions";
+                verdictEl.className = "text-xs uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-emerald-900/60 text-emerald-200";
+                parlEl.innerText = "Très Élevé (Interpellations immédiates)";
+                govEl.innerText = "Fort (Risque d'éclatement coalition)";
+                legEl.innerText = "Modéré à Élevé (Amendements / Loi)";
+                adviceEl.innerText = "La combinaison d'un volume massif, d'une unité sans faille et d'un timing politique opportun oblige la majorité à débloquer une enveloppe budgétaire ou un amendement.";
+            } else if (score >= 50) {
+                verdictEl.innerText = "Réponse Partielle / Aménagement";
+                verdictEl.className = "text-xs uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-amber-900/60 text-amber-200";
+                parlEl.innerText = "Élevé";
+                govEl.innerText = "Modéré";
+                legEl.innerText = "Faible (Report / Compensation)";
+                adviceEl.innerText = "Le mouvement crée une saillance médiatique suffisante pour freiner le projet initial ou obtenir une prime compensatoire, mais l'accord de gouvernement reste verrouillé.";
+            } else {
+                verdictEl.innerText = "Impasse ou Rejet du Gouvernement";
+                verdictEl.className = "text-xs uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-rose-900/60 text-rose-200";
+                parlEl.innerText = "Modéré (Opposition uniquement)";
+                govEl.innerText = "Inexistant (Fermeté)";
+                legEl.innerText = "Nul";
+                adviceEl.innerText = "Le signal est jugé trop faible, trop prévisible ou terni par des débordements. La coalition gouvernementale reste hermétique et applique son programme.";
+            }
+        }
+
+        // App Init
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistoryTable();
+            updateSimulator();
+        });
+    </script>
+</body>
+</html>
